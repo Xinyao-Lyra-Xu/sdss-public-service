@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
+Path("outputs").mkdir(exist_ok=True)
 
 GOLD_PATH = Path("data/gold/mart_location_day.csv")
 
@@ -50,4 +51,46 @@ plt.axhline(0.95, linestyle="--")
 plt.title("Utilization Over Time (Sample Locations)")
 plt.legend()
 plt.tight_layout()
+plt.savefig("outputs/qa_utilization_samples.png", dpi=200)
 plt.show()
+
+# ---------------------------
+# System-level analysis plot
+# ---------------------------
+
+SYSTEM_PATH = Path("data/gold/mart_system_day.csv")
+
+if SYSTEM_PATH.exists():
+    sys_df = pd.read_csv(SYSTEM_PATH)
+    sys_df["OCCUPANCY_DATE"] = pd.to_datetime(sys_df["OCCUPANCY_DATE"])
+
+    pivot_df = (
+        sys_df.pivot(
+            index="OCCUPANCY_DATE",
+            columns="location_type",
+            values="utilization"
+        )
+        .sort_index()
+    )
+
+    plt.figure(figsize=(10, 6))
+
+    if "fixed_location" in pivot_df.columns:
+        plt.plot(
+            pivot_df.index,
+            pivot_df["fixed_location"],
+            label="Fixed Locations"
+        )
+
+    if "temporary_or_unassigned" in pivot_df.columns:
+        plt.plot(
+            pivot_df.index,
+            pivot_df["temporary_or_unassigned"],
+            label="Temporary / Unassigned"
+        )
+
+    plt.title("System Utilization: Fixed vs Temporary Capacity")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig("outputs/system_utilization_comparison.png", dpi=200)
+    plt.show()
