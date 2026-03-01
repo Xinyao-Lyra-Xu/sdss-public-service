@@ -15,6 +15,7 @@ venv/
 data/bronze/
 data/silver/
 data/gold/
+data/raw
 outputs/
 
 # Logs
